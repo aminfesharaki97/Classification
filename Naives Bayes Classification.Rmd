@@ -1,0 +1,59 @@
+---
+title: "Naives Bayes Classification"
+author: "Amin Fesharaki"
+date: "11/14/2021"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(e1071)
+```
+
+```{r}
+fram_train <- read.csv(file = "/Users/datascience/Desktop/ADS 502 Data Sets/Website Data Sets/framingham_nb_training.csv", sep=',')
+fram_test <- read.csv(file = "/Users/datascience/Desktop/ADS 502 Data Sets/Website Data Sets/framingham_nb_training.csv", sep=',')
+
+```
+
+31. Run the Naïve Bayes classifier to classify persons as living or dead based on sex and education.
+
+```{r}
+nb01 <- naiveBayes(formula = Death ~ Sex + Educ, data = fram_train)
+nb01
+```
+
+32. Evaluate the Naïve Bayes model on the framingham_nb_test dataset.Display theresults in a contingency table. Edit the row and column names of the table to make the table more readable. Include a total row and column.
+
+```{r}
+ypred <- predict(object = nb01, newdata = fram_test)
+
+c.pred <- table(fram_test$Death, ypred)
+rownames(c.pred) <- c("Actual: Alive", "Actual: Dead")
+colnames(c.pred) <- c("Predicted: Alive", "Predicted: Dead")
+addmargins(A = c.pred, FUN = list(Total=sum), quiet = TRUE)
+
+```
+33. According to your table in the previous exercise, find the following values for the Naïve Bayes model: (A) Accuracy, (B) Error Rate
+```{r}
+# Assigning General Form of Table to matrix values
+TN <- c.pred[1,1]
+FN <- c.pred[2,1]
+FP <- c.pred[1,2]
+TP <- c.pred[2,2]
+
+
+# Accuracy
+Acc <- (TN + TP) / (TN + FN + FP + TP)
+# Error Rate
+Error <- 1 - Acc
+
+cat ("MODEL 2", "\nAccuracy = ", Acc, "\nError =", Error)
+```
+34. According to your contingency table, find the following values for the Naïve Bayesmodel: (A) How often it correctly classifies dead person (B) How often it correctly classifies living persons
+
+(a) The model correctly classifies a dead person 77% (428/550) of the time.
+(b) The model correctly classifies an alive person 37% (167/450) of the time.
