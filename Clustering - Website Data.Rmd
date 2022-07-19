@@ -1,0 +1,95 @@
+---
+title: "Clustering"
+author: "Amin Fesharaki"
+date: "12/4/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+wine_train <- read.csv(file = "/Users/datascience/Desktop/ADS 502 Data Sets/Website Data Sets/white_wine_training.csv")
+wine_test <- read.csv(file = "/Users/datascience/Desktop/ADS 502 Data Sets/Website Data Sets/white_wine_test.csv")
+```
+## 11. Input and standardize both the training and test data sets.
+
+```{r}
+#Separate
+X_train <-subset(wine_train, select = c("alcohol", "sugar" ))
+X_test <-subset(wine_test, select = c("alcohol", "sugar" ))
+
+
+#Scale
+X_strain = as.data.frame(scale(X_train))
+X_stest = as.data.frame(scale(X_test))
+
+colnames(X_strain) <- c("alchohol_z", "sugar_z")
+colnames(X_stest) <- c("alchohol_z", "sugar_z")
+```
+## 12. Run k‐means clustering on the training data set, using two clusters.
+
+```{r}
+# Cluster
+km_train <- kmeans(X_strain, centers =2)
+# Separate Clusters
+cluster <- as.factor (km_train$cluster) 
+Cluster1train <- X_strain [which(cluster ==1), ]
+Cluster2train <- X_strain [which(cluster ==2), ]
+
+```
+
+## 13. Give the mean of each variable within each cluster and use the means to identify a “Dry wines” and a “Sweet wines” cluster.
+
+```{r}
+#Cluster 1 Summary
+summary(Cluster1train)
+```
+
+```{r}
+#Cluster 2 Summary
+summary(Cluster2train)
+```
+###Based on the summary statistics for the two clusters, cluster 1 is considered 'Sweet Wines' because it has a signficantly higher sugar mean than cluster 2. Therefore, Cluster 2 is considered 'Dry Wines' (significantly lower sugar mean)
+
+
+## 14. Validate the clustering results by running k‐means clustering on the test data set, using two clusters, and identifying a “Dry wines” and a “Sweet wines” cluster.
+```{r}
+# Cluster
+km_test <- kmeans(X_stest, centers =2)
+# Separate Clusters
+cluster1 <- as.factor (km_test$cluster) 
+Cluster1test <- X_stest [which(cluster1 ==1), ]
+Cluster2test <- X_stest [which(cluster1 ==2), ]
+
+```
+
+```{r}
+#Cluster 1 Summary
+summary(Cluster1test)
+```
+
+```{r}
+#Cluster 2 Summary
+summary(Cluster2test)
+```
+###Based on the summary statistics for the two clusters, cluster 1 is considered 'Sweet Wines' because it has a signficantly higher sugar mean than cluster 2. Therefore, Cluster 2 is considered 'Dry Wines' (significantly lower sugar mean)
+
+```{r}
+#Validation with difference of means
+diff_alc_mean_sweet <- mean(Cluster1train$alchohol_z) - mean(Cluster1test$alchohol_z)
+diff_alc_mean_dry <- mean(Cluster2train$alchohol_z) - mean(Cluster2test$alchohol_z) 
+
+diff_sug_mean_sweet <- mean(Cluster1train$sugar_z) - mean(Cluster1test$sugar_z)
+diff_sug_mean_dry <- mean(Cluster2train$sugar_z) - mean(Cluster2test$sugar_z) 
+
+cat("The difference in alchohol means for sweet wine", diff_alc_mean_sweet)
+cat("\nThe difference in alchohol means for dry wine", diff_alc_mean_dry)
+cat("\nThe difference in sugar means for sweet wine", diff_sug_mean_sweet)
+cat("\nThe difference in sugar means for dry wine", diff_sug_mean_dry)
+```
+The data sets are validated. However, the difference of means are relatively small, to further validate the data sets, a two-sample t-test should be used.

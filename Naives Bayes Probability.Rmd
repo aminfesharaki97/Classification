@@ -1,0 +1,86 @@
+---
+title: "Naives Bayes - Water Treatment Plant"
+author: "Amin Fesharaki"
+date: "6/19/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Question 3
+
+Predictive data anapestics models are often used for process quality control and fault detection. The task in this code is to create a naive Bayes model to monitor waste water treatment plan. The data contains details of activities at a waste water treatment plan for 14 days. Each day is described in terms of 6 descriptive features that are generated from different sensors at the plant. SS-in measures the solids coming into the plant per day; SED-IN meeasure the sediment coming into the plant per day; COND-IN measures the electrical conductivity of the water coming into the plant. The features SS-OUT, SED-OUT, and COND-OUT are the corresponding measurements for the water flowing out of the plant. The target feature, STATUS reports the current situation at the plant; 'ok', everything working correctly; 'settler', there is a problem with the plant settler equipment, or 'solids', there is a  problem with the amount of solids going through the plant. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(klaR)
+```
+
+```{r}
+# Import data and label columns 
+ 
+# Column Names
+cnames <- c('SS-IN','SED-IN','COND-IN','SS-OUT','SED-OUT','COND-OUT','STATUS')
+
+# Load Data
+data <- read.csv('/Users/datascience/Desktop/ADS 503 -Applied Predictive Modeling  Assignments & RCode/data.csv', col.names = cnames)
+
+# Set the response variable as a factor for NaiveBayes function
+data$STATUS <- as.factor(data$STATUS) 
+```
+
+## a) Create a naive Bayes model that uses probability density functions to model the descriptive features in this dataset (assume that all the descriptive features are normally distributed). 
+
+## *Naive Bayes Model*
+```{r}
+set.seed(3)
+
+
+
+#Naive Bayes Model
+NB <- NaiveBayes(STATUS ~., data = data) # useKernel set to true to allow a flexible function to model the probability distribution of the class (status) probabilities
+```
+
+## *Results*
+```{r}
+# Class Distributions
+NB$apriori
+```
+*Class Distribution for the dependent variable  (shown above)
+
+
+```{r}
+# Conditional Probabilities
+NB$tables
+```
+*For each categorical variable (status) the tables provides, for each attribute level (ok, settler, solids), the conditional probabilities given the target class (shown above) 
+
+*For each numeric variable, a table gives, for each target class, the mean and standard deviation of object of class density (shown above)  
+
+
+## b)	What prediction will the naive Bayes model return for the following query? SS-IN = 222, SED-IN = 4.5, COND-IN = 1,518, SS-OUT = 74 SED-OUT = 0.25, COND-OUT = 1,642. 
+
+```{r}
+# Create a new data frame with the values listed in part B
+newdata <- c(222, 4.5, 1518, 74, 0.25, 1642)
+df <- as.data.frame(newdata)
+df <- as.data.frame(t(df)) #Transpose data frame
+colnames(df) <- c('SS.IN','SED.IN','COND.IN','SS.OUT','SED.OUT','COND.OUT') #col names
+rownames(df) <- NULL # row names
+```
+
+```{r, warning=FALSE}
+# Predict Results
+BayesProb <- predict(NB, df)
+```
+## *Class(status) Probability values*
+```{r}
+BayesProb$posterior
+```
+## *Prediction*
+```{r}
+ BayesProb$class
+```
+*The following query will have a result of "settler" for its 'STATUS' 
